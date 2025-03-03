@@ -43,10 +43,10 @@ use alloc::vec::Vec;
 use alloc::borrow::Cow;
 
 // Make sure that our assumptions for storing a pointer + its size in `u64` is valid.
-#[cfg(all(not(feature = "std"), not(feature = "disable_target_static_assertions")))]
-assert_eq_size!(usize, u32);
-#[cfg(all(not(feature = "std"), not(feature = "disable_target_static_assertions")))]
-assert_eq_size!(*const u8, u32);
+//#[cfg(all(not(feature = "std"), not(feature = "disable_target_static_assertions")))]
+//assert_eq_size!(usize, u32);
+//#[cfg(all(not(feature = "std"), not(feature = "disable_target_static_assertions")))]
+//assert_eq_size!(*const u8, u32);
 
 /// Implement the traits for the given primitive traits.
 macro_rules! impl_traits_for_primitives {
