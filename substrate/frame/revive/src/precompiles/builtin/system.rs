@@ -15,15 +15,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{
-	precompiles::{BuiltinAddressMatcher, BuiltinPrecompile, Error, Ext},
-	vm::RuntimeCosts,
-	Config,
-};
+use crate::{precompiles::{BuiltinAddressMatcher, BuiltinPrecompile, Error, Ext}, vm::RuntimeCosts, Config, Key, SENTINEL};
 use alloc::vec::Vec;
 use alloy_core::sol;
 use core::{marker::PhantomData, num::NonZero};
+use crate::exec::PrecompileWithInfoExt;
+use alloy_core::sol_types::ContractError::Revert;
+use frame_support::ensure;
+use pallet_revive_uapi::StorageFlags;
 use sp_core::hexdisplay::AsBytesRef;
+use crate::vm::TrapReason;
 
 pub struct System<T>(PhantomData<T>);
 
@@ -57,7 +58,8 @@ impl<T: Config> BuiltinPrecompile for System<T> {
 		_address: &[u8; 20],
 		input: &Self::Interface,
 		env: &mut impl Ext<T = Self::T>,
-	) -> Result<Vec<u8>, Error> {
+	) -> Result<Vec<u8>, Error>
+	{
 		use ISystem::ISystemCalls;
 		match input {
 			ISystemCalls::hashBlake256(ISystem::hashBlake256Call { input }) => {

@@ -53,6 +53,7 @@ use sp_runtime::DispatchError;
 pub(crate) use builtin::{
 	IBenchmarking, ISystem, NoInfo as BenchmarkNoInfo, System as BenchmarkSystem,
 	WithInfo as BenchmarkWithInfo,
+	IStorage, Storage as BenchmarkStorage,
 };
 
 const UNIMPLEMENTED: &str = "A precompile must either implement `call` or `call_with_info`";

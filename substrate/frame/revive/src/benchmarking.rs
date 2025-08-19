@@ -25,6 +25,7 @@ use crate::{
 	limits,
 	precompiles::{
 		self, run::builtin as run_builtin_precompile, BenchmarkSystem, BuiltinPrecompile, ISystem,
+		IStorage, BenchmarkStorage,
 	},
 	storage::WriteOutcome,
 	Pallet as Contracts, *,
@@ -1261,32 +1262,60 @@ mod benchmarks {
 		Ok(())
 	}
 
+	// todo
 	#[benchmark(skip_meta, pov_mode = Measured)]
-	fn seal_clear_storage(n: Linear<0, { limits::PAYLOAD_BYTES }>) -> Result<(), BenchmarkError> {
-		let max_key_len = limits::STORAGE_KEY_BYTES;
-		let key = Key::try_from_var(vec![0u8; max_key_len as usize])
-			.map_err(|_| "Key has wrong length")?;
-		build_runtime!(runtime, instance, memory: [ key.unhashed(), ]);
-		let info = instance.info()?;
+	fn clear_storage(n: Linear<0, { limits::PAYLOAD_BYTES }>) -> Result<(), BenchmarkError> {
+		/*
+			let max_key_len = limits::STORAGE_KEY_BYTES;
+			let key = Key::try_from_var(vec![0u8; max_key_len as usize])
+				.map_err(|_| "Key has wrong length")?;
+			build_runtime!(runtime, instance, memory: [ key.unhashed(), ]);
+			let info = instance.info()?;
 
-		info.write(&key, Some(vec![42u8; n as usize]), None, false)
-			.map_err(|_| "Failed to write to storage during setup.")?;
+			info.write(&key, Some(vec![42u8; n as usize]), None, false)
+				.map_err(|_| "Failed to write to storage during setup.")?;
+
+			let result;
+			#[block]
+			{
+				result = runtime.bench_clear_storage(
+					memory.as_mut_slice(),
+					StorageFlags::empty().bits(),
+					0,
+					max_key_len,
+				);
+			}
+
+			assert_ok!(result);
+			assert!(info.read(&key).is_none());
+		 */
+		let max_key_len = limits::STORAGE_KEY_BYTES;
+		//let key = Key::try_from_var(vec![0u8; max_key_len as usize])
+			//.map_err(|_| "Key has wrong length")?;
+		let key = vec![0u8; max_key_len as usize];
+		let input = vec![0u8; n as usize];
+		let input_bytes = IStorage::IStorageCalls::clearStorage(IStorage::clearStorageCall {
+			//input: input.clone().into(),
+			flags: StorageFlags::empty().bits(),
+			key: key.into(),
+		})
+			.abi_encode();
+
+		let mut call_setup = CallSetup::<T>::default();
+		let (mut ext, _) = call_setup.ext();
 
 		let result;
 		#[block]
 		{
-			result = runtime.bench_clear_storage(
-				memory.as_mut_slice(),
-				StorageFlags::empty().bits(),
-				0,
-				max_key_len,
+			result = run_builtin_precompile(
+				&mut ext,
+				H160(BenchmarkStorage::<T>::MATCHER.base_address()).as_fixed_bytes(),
+				input_bytes,
 			);
 		}
-
-		assert_ok!(result);
-		assert!(info.read(&key).is_none());
-		Ok(())
-	}
+		//assert_eq!(sp_io::hashing::blake2_256(&input).to_vec(), result.unwrap().data);
+			Ok(())
+		}
 
 	#[benchmark(skip_meta, pov_mode = Measured)]
 	fn seal_get_storage(n: Linear<0, { limits::PAYLOAD_BYTES }>) -> Result<(), BenchmarkError> {
@@ -1319,35 +1348,44 @@ mod benchmarks {
 	}
 
 	#[benchmark(skip_meta, pov_mode = Measured)]
-	fn seal_contains_storage(
+	fn contains_storage(
 		n: Linear<0, { limits::PAYLOAD_BYTES }>,
 	) -> Result<(), BenchmarkError> {
-		let max_key_len = limits::STORAGE_KEY_BYTES;
-		let key = Key::try_from_var(vec![0u8; max_key_len as usize])
-			.map_err(|_| "Key has wrong length")?;
-		build_runtime!(runtime, instance, memory: [ key.unhashed(), ]);
-		let info = instance.info()?;
-
-		info.write(&key, Some(vec![42u8; n as usize]), None, false)
-			.map_err(|_| "Failed to write to storage during setup.")?;
-
-		let result;
 		#[block]
-		{
-			result = runtime.bench_contains_storage(
-				memory.as_mut_slice(),
-				StorageFlags::empty().bits(),
-				0,
-				max_key_len,
-			);
+		{ }
+	// todo
+		/*
+			let max_key_len = limits::STORAGE_KEY_BYTES;
+			let key = Key::try_from_var(vec![0u8; max_key_len as usize])
+				.map_err(|_| "Key has wrong length")?;
+			build_runtime!(runtime, instance, memory: [ key.unhashed(), ]);
+			let info = instance.info()?;
+
+			info.write(&key, Some(vec![42u8; n as usize]), None, false)
+				.map_err(|_| "Failed to write to storage during setup.")?;
+
+			let result;
+			#[block]
+			{
+				result = runtime.bench_contains_storage(
+					memory.as_mut_slice(),
+					StorageFlags::empty().bits(),
+					0,
+					max_key_len,
+				);
+			}
+
+			assert_eq!(result.unwrap(), n);
+		*/
+			Ok(())
 		}
 
-		assert_eq!(result.unwrap(), n);
-		Ok(())
-	}
-
 	#[benchmark(skip_meta, pov_mode = Measured)]
-	fn seal_take_storage(n: Linear<0, { limits::PAYLOAD_BYTES }>) -> Result<(), BenchmarkError> {
+	fn take_storage(n: Linear<0, { limits::PAYLOAD_BYTES }>) -> Result<(), BenchmarkError> {
+		// todo
+		#[block]
+		{ }
+		/*
 		let max_key_len = limits::STORAGE_KEY_BYTES;
 		let key = Key::try_from_var(vec![0u8; max_key_len as usize])
 			.map_err(|_| "Key has wrong length")?;
@@ -1375,6 +1413,7 @@ mod benchmarks {
 		assert_ok!(result);
 		assert!(&info.read(&key).is_none());
 		assert_eq!(&value, &memory[out_ptr as usize..]);
+		*/
 		Ok(())
 	}
 

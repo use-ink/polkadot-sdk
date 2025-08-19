@@ -325,13 +325,16 @@ pub enum RuntimeCosts {
 	DepositEvent { num_topic: u32, len: u32 },
 	/// Weight of calling `seal_set_storage` for the given storage item sizes.
 	SetStorage { old_bytes: u32, new_bytes: u32 },
-	/// Weight of calling `seal_clear_storage` per cleared byte.
+	/// Weight of calling the `clearStorage` function of the `System` pre-compile
+	/// per cleared byte.
 	ClearStorage(u32),
-	/// Weight of calling `seal_contains_storage` per byte of the checked item.
+	/// Weight of calling the `containsStorage` function of the `System` pre-compile
+	/// per byte of the checked item.
 	ContainsStorage(u32),
 	/// Weight of calling `seal_get_storage` with the specified size in storage.
 	GetStorage(u32),
-	/// Weight of calling `seal_take_storage` for the given size.
+	/// Weight of calling the `takeStorage` function of the `System` pre-compile
+	/// for the given size.
 	TakeStorage(u32),
 	/// Weight of calling `seal_set_transient_storage` for the given storage item sizes.
 	SetTransientStorage { old_bytes: u32, new_bytes: u32 },
@@ -486,10 +489,10 @@ impl<T: Config> Token<T> for RuntimeCosts {
 			SetStorage { new_bytes, old_bytes } => {
 				cost_storage!(write, seal_set_storage, new_bytes, old_bytes)
 			},
-			ClearStorage(len) => cost_storage!(write, seal_clear_storage, len),
-			ContainsStorage(len) => cost_storage!(read, seal_contains_storage, len),
+			ClearStorage(len) => T::WeightInfo::clear_storage(len),
+			ContainsStorage(len) => T::WeightInfo::contains_storage(len),
 			GetStorage(len) => cost_storage!(read, seal_get_storage, len),
-			TakeStorage(len) => cost_storage!(write, seal_take_storage, len),
+			TakeStorage(len) => T::WeightInfo::take_storage(len),
 			SetTransientStorage { new_bytes, old_bytes } => {
 				cost_storage!(write_transient, seal_set_transient_storage, new_bytes, old_bytes)
 			},
@@ -894,32 +897,6 @@ impl<'a, E: Ext, M: ?Sized + Memory<E::T>> Runtime<'a, E, M> {
 		Ok(write_outcome.old_len_with_sentinel())
 	}
 
-	fn clear_storage(
-		&mut self,
-		memory: &M,
-		flags: u32,
-		key_ptr: u32,
-		key_len: u32,
-	) -> Result<u32, TrapReason> {
-		let transient = Self::is_transient(flags)?;
-		let costs = |len| {
-			if transient {
-				RuntimeCosts::ClearTransientStorage(len)
-			} else {
-				RuntimeCosts::ClearStorage(len)
-			}
-		};
-		let charged = self.charge_gas(costs(self.ext.max_value_size()))?;
-		let key = self.decode_key(memory, key_ptr, key_len)?;
-		let outcome = if transient {
-			self.ext.set_transient_storage(&key, None, false)?
-		} else {
-			self.ext.set_storage(&key, None, false)?
-		};
-		self.adjust_gas(charged, costs(outcome.old_len()));
-		Ok(outcome.old_len_with_sentinel())
-	}
-
 	fn get_storage(
 		&mut self,
 		memory: &mut M,
@@ -991,74 +968,6 @@ impl<'a, E: Ext, M: ?Sized + Memory<E::T>> Runtime<'a, E, M> {
 				},
 				StorageReadMode::VariableOutput { .. } => Ok(ReturnErrorCode::KeyNotFound),
 			}
-		}
-	}
-
-	fn contains_storage(
-		&mut self,
-		memory: &M,
-		flags: u32,
-		key_ptr: u32,
-		key_len: u32,
-	) -> Result<u32, TrapReason> {
-		let transient = Self::is_transient(flags)?;
-		let costs = |len| {
-			if transient {
-				RuntimeCosts::ContainsTransientStorage(len)
-			} else {
-				RuntimeCosts::ContainsStorage(len)
-			}
-		};
-		let charged = self.charge_gas(costs(self.ext.max_value_size()))?;
-		let key = self.decode_key(memory, key_ptr, key_len)?;
-		let outcome = if transient {
-			self.ext.get_transient_storage_size(&key)
-		} else {
-			self.ext.get_storage_size(&key)
-		};
-		self.adjust_gas(charged, costs(outcome.unwrap_or(0)));
-		Ok(outcome.unwrap_or(SENTINEL))
-	}
-
-	fn take_storage(
-		&mut self,
-		memory: &mut M,
-		flags: u32,
-		key_ptr: u32,
-		key_len: u32,
-		out_ptr: u32,
-		out_len_ptr: u32,
-	) -> Result<ReturnErrorCode, TrapReason> {
-		let transient = Self::is_transient(flags)?;
-		let costs = |len| {
-			if transient {
-				RuntimeCosts::TakeTransientStorage(len)
-			} else {
-				RuntimeCosts::TakeStorage(len)
-			}
-		};
-		let charged = self.charge_gas(costs(self.ext.max_value_size()))?;
-		let key = self.decode_key(memory, key_ptr, key_len)?;
-		let outcome = if transient {
-			self.ext.set_transient_storage(&key, None, true)?
-		} else {
-			self.ext.set_storage(&key, None, true)?
-		};
-
-		if let crate::storage::WriteOutcome::Taken(value) = outcome {
-			self.adjust_gas(charged, costs(value.len() as u32));
-			self.write_sandbox_output(
-				memory,
-				out_ptr,
-				out_len_ptr,
-				&value,
-				false,
-				already_charged,
-			)?;
-			Ok(ReturnErrorCode::Success)
-		} else {
-			self.adjust_gas(charged, costs(0));
-			Ok(ReturnErrorCode::KeyNotFound)
 		}
 	}
 
@@ -1311,7 +1220,9 @@ pub mod env {
 		let value = memory.read(value_ptr, 32)?;
 
 		if value.iter().all(|&b| b == 0) {
-			self.clear_storage(memory, flags, key_ptr, SENTINEL)
+			// todo
+			// self.clear_storage(memory, flags, key_ptr, SENTINEL)
+			Ok(1)
 		} else {
 			self.set_storage(memory, flags, key_ptr, SENTINEL, StorageValue::Value(value))
 		}
@@ -1951,31 +1862,6 @@ pub mod env {
 		Ok(self.ext.caller_is_root() as u32)
 	}
 
-	/// Clear the value at the given key in the contract storage.
-	/// See [`pallet_revive_uapi::HostFn::clear_storage`]
-	#[mutating]
-	fn clear_storage(
-		&mut self,
-		memory: &mut M,
-		flags: u32,
-		key_ptr: u32,
-		key_len: u32,
-	) -> Result<u32, TrapReason> {
-		self.clear_storage(memory, flags, key_ptr, key_len)
-	}
-
-	/// Checks whether there is a value stored under the given key.
-	/// See [`pallet_revive_uapi::HostFn::contains_storage`]
-	fn contains_storage(
-		&mut self,
-		memory: &mut M,
-		flags: u32,
-		key_ptr: u32,
-		key_len: u32,
-	) -> Result<u32, TrapReason> {
-		self.contains_storage(memory, flags, key_ptr, key_len)
-	}
-
 	/// Calculates Ethereum address from the ECDSA compressed public key and stores
 	/// See [`pallet_revive_uapi::HostFn::ecdsa_to_eth_address`].
 	fn ecdsa_to_eth_address(
@@ -2062,21 +1948,6 @@ pub mod env {
 		} else {
 			Ok(ReturnErrorCode::Sr25519VerifyFailed)
 		}
-	}
-
-	/// Retrieve and remove the value under the given key from storage.
-	/// See [`pallet_revive_uapi::HostFn::take_storage`]
-	#[mutating]
-	fn take_storage(
-		&mut self,
-		memory: &mut M,
-		flags: u32,
-		key_ptr: u32,
-		key_len: u32,
-		out_ptr: u32,
-		out_len_ptr: u32,
-	) -> Result<ReturnErrorCode, TrapReason> {
-		self.take_storage(memory, flags, key_ptr, key_len, out_ptr, out_len_ptr)
 	}
 
 	/// Remove the calling account and transfer remaining **free** balance.

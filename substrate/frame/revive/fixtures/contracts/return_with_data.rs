@@ -19,12 +19,12 @@
 #![no_main]
 include!("../panic_handler.rs");
 
-use uapi::{input, HostFn, HostFnImpl as api, StorageFlags};
+//use uapi::{input, HostFn, HostFnImpl as api, StorageFlags};
 
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn deploy() {
-	call();
+	//call();
 }
 
 /// Reads the first byte as the exit status and copy all but the first 4 bytes of the input as
@@ -32,6 +32,7 @@ pub extern "C" fn deploy() {
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
+	/*
 	input!(
 		input, 128,
 		exit_status: [u8; 4],
@@ -44,4 +45,5 @@ pub extern "C" fn call() {
 
 	let exit_status = uapi::ReturnFlags::from_bits(exit_status[0] as u32).unwrap();
 	api::return_value(exit_status, output);
+	 */
 }

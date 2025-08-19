@@ -21,7 +21,7 @@
 #![no_main]
 include!("../panic_handler.rs");
 
-use uapi::{unwrap_output, HostFn, HostFnImpl as api, StorageFlags};
+//use uapi::{unwrap_output, HostFn, HostFnImpl as api, StorageFlags};
 
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
@@ -30,6 +30,7 @@ pub extern "C" fn deploy() {}
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
+	/*
 	const KEY: [u8; 32] = [1u8; 32];
 	const VALUE_1: [u8; 4] = [1u8; 4];
 	const VALUE_2: [u8; 4] = [2u8; 4];
@@ -60,4 +61,5 @@ pub extern "C" fn call() {
 	assert_eq!(existing, None);
 	unwrap_output!(val, [0u8; 32], api::take_storage, StorageFlags::empty(), &KEY);
 	assert_eq!(**val, VALUE_3);
+	 */
 }

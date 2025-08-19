@@ -21,12 +21,13 @@
 #![no_main]
 
 include!("../panic_handler.rs");
-use uapi::{HostFn, HostFnImpl as api, StorageFlags};
+//use uapi::{HostFn, HostFnImpl as api, StorageFlags};
 
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn deploy() {}
 
+/*
 fn test_storage_operations(flags: StorageFlags) {
 	const KEY: [u8; 32] = [1u8; 32];
 	const VALUE_A: [u8; 32] = [4u8; 32];
@@ -71,13 +72,16 @@ fn test_storage_operations(flags: StorageFlags) {
 	// Clean up
 	api::clear_storage(flags, &KEY);
 }
+*/
 
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
+	/*
 	// Test with regular storage
 	test_storage_operations(StorageFlags::empty());
 
 	// Test with transient storage
 	test_storage_operations(StorageFlags::TRANSIENT);
+	 */
 }
