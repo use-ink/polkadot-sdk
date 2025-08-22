@@ -217,19 +217,18 @@ pub trait HostFn: private::Sealed {
 	/// - `topics`: The topics list. It can't contain duplicates.
 	fn deposit_event(topics: &[[u8; 32]], data: &[u8]);
 
-	       /// Retrieve the value under the given key from storage.
-	       ///
-	       /// The key length must not exceed the maximum defined by the contracts module parameter.
-	       ///
-	       /// # Parameters
-	       /// - `key`: The storage key.
-	       /// - `output`: A reference to the output data buffer to write the storage entry.
-	       ///
-	       /// # Errors
-	       ///
-	       /// [KeyNotFound][`crate::ReturnErrorCode::KeyNotFound]
-	       fn get_storage(flags: StorageFlags, key: &[u8], output: &mut &mut [u8]) -> Result;
-
+	/// Retrieve the value under the given key from storage.
+	///
+	/// The key length must not exceed the maximum defined by the contracts module parameter.
+	///
+	/// # Parameters
+	/// - `key`: The storage key.
+	/// - `output`: A reference to the output data buffer to write the storage entry.
+	///
+	/// # Errors
+	///
+	/// [KeyNotFound][`crate::ReturnErrorCode::KeyNotFound]
+	fn get_storage(flags: StorageFlags, key: &[u8], output: &mut &mut [u8]) -> Result;
 
 	/// Computes the keccak_256 32-bit hash on the given input buffer.
 	///
@@ -487,7 +486,6 @@ pub trait HostFn: private::Sealed {
 	/// and `false` indicates that the caller is a signed origin.
 	#[unstable_hostfn]
 	fn caller_is_root() -> bool;
-
 
 	/// Calculates Ethereum address from the ECDSA compressed public key and stores
 	/// it into the supplied buffer.

@@ -1220,9 +1220,7 @@ pub mod env {
 		let value = memory.read(value_ptr, 32)?;
 
 		if value.iter().all(|&b| b == 0) {
-			// todo
-			// self.clear_storage(memory, flags, key_ptr, SENTINEL)
-			Ok(1)
+			self.clear_storage(memory, flags, key_ptr, SENTINEL)
 		} else {
 			self.set_storage(memory, flags, key_ptr, SENTINEL, StorageValue::Value(value))
 		}

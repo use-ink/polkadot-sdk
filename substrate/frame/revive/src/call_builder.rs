@@ -34,7 +34,7 @@ use crate::{
 	vm::{PreparedCall, Runtime},
 	AccountInfo, BalanceOf, BalanceWithDust, BumpNonce, Code, CodeInfoOf, Config, ContractBlob,
 	ContractInfo, DepositLimit, Error, GasMeter, MomentOf, Origin, Pallet as Contracts,
-	PristineCode, Weight,
+	PristineCode, Weight, LOG_TARGET,
 };
 use alloc::{vec, vec::Vec};
 use frame_support::{storage::child, traits::fungible::Mutate};
