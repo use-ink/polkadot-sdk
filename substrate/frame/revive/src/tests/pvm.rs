@@ -1129,9 +1129,12 @@ fn cannot_self_destruct_in_constructor() {
 	ExtBuilder::default().existential_deposit(50).build().execute_with(|| {
 		let _ = <Test as Config>::Currency::set_balance(&ALICE, 1_000_000);
 
-		// Fail to instantiate the BOB because the constructor calls seal_terminate.
+		// Fail to instantiate because the constructor calls the `terminate`
+		// function of the `Selfdestruct` pre-compile.
+		let ret = builder::instantiate_with_code(binary).value(100_000).build();
+		eprintln!("ret {:?}", ret);
 		assert_err_ignore_postinfo!(
-			builder::instantiate_with_code(binary).value(100_000).build(),
+			ret,
 			Error::<Test>::TerminatedInConstructor,
 		);
 	});

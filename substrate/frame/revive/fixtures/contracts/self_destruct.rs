@@ -17,7 +17,13 @@
 
 #![no_std]
 #![no_main]
+
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(unused)]
+
 include!("../panic_handler.rs");
+include!("../sol_utils.rs");
 
 use uapi::{input, HostFn, HostFnImpl as api};
 
@@ -55,6 +61,8 @@ pub extern "C" fn call() {
 		.unwrap();
 	} else {
 		// Try to terminate and give balance to django.
-		api::terminate(&DJANGO_FALLBACK);
+		// api::terminate(&DJANGO_FALLBACK);
+		self_destruct::<api>(&DJANGO_FALLBACK);
+		unreachable!("will never be reached")
 	}
 }

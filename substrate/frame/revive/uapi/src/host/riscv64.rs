@@ -89,7 +89,6 @@ mod sys {
 			output_data: u64,
 			address_and_salt: u64,
 		) -> ReturnCode;
-		pub fn terminate(beneficiary_ptr: *const u8);
 		pub fn call_data_copy(out_ptr: *mut u8, out_len: u32, offset: u32);
 		pub fn call_data_load(out_ptr: *mut u8, offset: u32);
 		pub fn seal_return(flags: u32, data_ptr: *const u8, data_len: u32);
@@ -551,12 +550,6 @@ impl HostFn for HostFnImpl {
 		};
 		extract_from_slice(output, output_len as usize);
 		ret_code.into()
-	}
-
-	#[unstable_hostfn]
-	fn terminate(beneficiary: &[u8; 20]) -> ! {
-		unsafe { sys::terminate(beneficiary.as_ptr()) }
-		panic!("terminate does not return");
 	}
 
 	#[unstable_hostfn]

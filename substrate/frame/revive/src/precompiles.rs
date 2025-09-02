@@ -52,6 +52,7 @@ use sp_runtime::DispatchError;
 #[cfg(feature = "runtime-benchmarks")]
 pub(crate) use builtin::{
 	IBenchmarking, ISystem, NoInfo as BenchmarkNoInfo, System as BenchmarkSystem,
+	ISelfdestruct, Selfdestruct as BenchmarkSelfdestruct,
 	WithInfo as BenchmarkWithInfo,
 };
 
@@ -347,6 +348,7 @@ impl<P: Precompile> BuiltinPrecompile for P {
 		input: &Self::Interface,
 		env: &mut impl Ext<T = Self::T>,
 	) -> Result<Vec<u8>, Error> {
+		log::info!(target: crate::LOG_TARGET, "----------------call 2");
 		Self::call(address, input, env)
 	}
 
@@ -355,6 +357,7 @@ impl<P: Precompile> BuiltinPrecompile for P {
 		input: &Self::Interface,
 		env: &mut impl ExtWithInfo<T = Self::T>,
 	) -> Result<Vec<u8>, Error> {
+		log::info!(target: crate::LOG_TARGET, "----------------call 1");
 		Self::call_with_info(address, input, env)
 	}
 }
@@ -370,6 +373,7 @@ impl<P: BuiltinPrecompile> PrimitivePrecompile for P {
 		input: Vec<u8>,
 		env: &mut impl Ext<T = Self::T>,
 	) -> Result<Vec<u8>, Error> {
+		log::info!(target: crate::LOG_TARGET, "----------------call 3");
 		let call = <Self as BuiltinPrecompile>::Interface::abi_decode_validate(&input)
 			.map_err(|_| Error::Panic(PanicKind::ResourceError))?;
 		<Self as BuiltinPrecompile>::call(address, &call, env)
@@ -380,6 +384,7 @@ impl<P: BuiltinPrecompile> PrimitivePrecompile for P {
 		input: Vec<u8>,
 		env: &mut impl ExtWithInfo<T = Self::T>,
 	) -> Result<Vec<u8>, Error> {
+		log::info!(target: crate::LOG_TARGET, "----------------call 4");
 		let call = <Self as BuiltinPrecompile>::Interface::abi_decode_validate(&input)
 			.map_err(|_| Error::Panic(PanicKind::ResourceError))?;
 		<Self as BuiltinPrecompile>::call_with_info(address, &call, env)
@@ -465,8 +470,11 @@ impl<T: Config> Precompiles<T> for (Builtin<T>, <T as Config>::Precompiles) {
 	}
 
 	fn get<E: ExtWithInfo<T = T>>(address: &[u8; 20]) -> Option<Instance<E>> {
+		log::info!(target: crate::LOG_TARGET, "----------------get pre-compile at {:?}", address);
 		let _ = <Self as Precompiles<T>>::CHECK_COLLISION;
-		<Builtin<T>>::get(address).or_else(|| <T as Config>::Precompiles::get(address))
+		let ret = <Builtin<T>>::get(address).or_else(|| <T as Config>::Precompiles::get(address));
+		log::info!(target: crate::LOG_TARGET, "----------------get pre-compile at {:?}: {:?}", address, ret.is_some());
+		ret
 	}
 }
 
@@ -600,10 +608,13 @@ pub mod run {
 		MomentOf<E::T>: Into<U256>,
 		<<E as Ext>::T as frame_system::Config>::Hash: frame_support::traits::IsType<H256>,
 	{
+		log::info!(target: crate::LOG_TARGET, "----------------call 5");
 		assert!(P::MATCHER.into_builtin().matches(address));
 		if P::HAS_CONTRACT_INFO {
+			log::info!(target: crate::LOG_TARGET, "----------------call 6");
 			P::call_with_info(address, input, ext)
 		} else {
+			log::info!(target: crate::LOG_TARGET, "----------------call 7");
 			P::call(address, input, ext)
 		}
 	}

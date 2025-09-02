@@ -24,6 +24,7 @@ mod point_eval;
 mod ripemd160;
 mod sha256;
 mod system;
+mod selfdestruct;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
@@ -38,6 +39,7 @@ use crate::{
 pub use self::{
 	benchmarking::{IBenchmarking, NoInfo, WithInfo},
 	system::{ISystem, System},
+	selfdestruct::{ISelfdestruct, Selfdestruct},
 };
 
 #[cfg(not(feature = "runtime-benchmarks"))]
@@ -58,6 +60,7 @@ type Production<T> = (
 	blake2f::Blake2F<T>,
 	point_eval::PointEval<T>,
 	system::System<T>,
+	selfdestruct::Selfdestruct<T>,
 );
 
 #[cfg(feature = "runtime-benchmarks")]
