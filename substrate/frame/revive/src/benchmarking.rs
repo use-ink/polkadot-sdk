@@ -2100,13 +2100,19 @@ mod benchmarks {
 		//let sig: sig.into_iter().collect::<Vec<_>>().into(),
 		// Map each byte into a FixedBytes<1>
 		use alloy_core::primitives::FixedBytes;
-		let sigt: [FixedBytes<1>; 64] = sig
+		let half1 = FixedBytes::<32>::from_slice(&sig[..32]);
+		let half2 = FixedBytes::<32>::from_slice(&sig[32..]);
+		let sigt: [FixedBytes<32>; 2] = [half1, half2];
+		/*
+		let sigt: [FixedBytes<32>; 2] = sig
 			.into_iter()
-			.map(|b| FixedBytes::<1>::from([b]))
+			.map(|b| FixedBytes::<32>::from([b]))
+			//.map(|b| b.0)
 			.collect::<Vec<_>>()
 			.try_into()
 			.unwrap();
 			//.map_err(|_| "conversion to array failed")?;
+		 */
 
 		let input_bytes =
 			ISystem::ISystemCalls::sr25519Verify(ISystem::sr25519VerifyCall {

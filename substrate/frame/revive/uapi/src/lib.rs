@@ -105,8 +105,6 @@ define_error_codes! {
 	TransferFailed = 4,
 	/// The subcall ran out of weight or storage deposit.
 	OutOfResources = 5,
-	/// sr25519 signature verification failed.
-	Sr25519VerifyFailed = 8,
 	/// Contract instantiation failed because the address already exists.
 	/// Occurs when instantiating the same contract with the same salt more than once.
 	DuplicateContractAddress = 11,

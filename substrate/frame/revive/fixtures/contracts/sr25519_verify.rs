@@ -53,8 +53,8 @@ pub extern "C" fn call() {
 
 
 	//function sr25519Verify(bytes1[64] signature, bytes32 pubkey, bytes memory message)
-	let mut input = [0u8; 512];
-	let selector = solidity_selector("sr25519Recover(bytes1[64],bytes32,bytes)");
+	let mut input = [0u8; 2048];
+	let selector = solidity_selector("sr25519Verify(bytes32[2],bytes32,bytes)");
 	input[..4].copy_from_slice(&selector[..4]);
 	input[4..68].copy_from_slice(&signature[..64]);
 	input[68..68+32].copy_from_slice(&pub_key[..32]);
@@ -62,16 +62,30 @@ pub extern "C" fn call() {
 	let n = encode_bytes(&msg, &mut input[68+32..]);
 	//input[68+32..68+32+64].copy_from_slice(&pubkey[..32]);
 
-	let _ = api::delegate_call(
+	let mut out = [0u8; 32];
+
+	let ret = api::delegate_call(
 		uapi::CallFlags::empty(),
 		&SYSTEM_PRECOMPILE_ADDR,
 		u64::MAX,       // How much ref_time to devote for the execution. u64::MAX = use all.
 		u64::MAX,       // How much proof_size to devote for the execution. u64::MAX = use all.
 		&[u8::MAX; 32], // No deposit limit.
 		&input[..68+32+n],
-		None,
+		//&input[..],
+		//None,
+		Some(&mut &mut out[..])
 	).unwrap();
+
+	//assert_eq!(out[31], );
+
+	/*
+	if let Err(code) = ret {
+		api::return_value(uapi::ReturnFlags::REVERT, &(code as u32).to_le_bytes());
+	};
+	 */
 
 	// Exit with success and take transfer return code to the output buffer.
 	//api::return_value(uapi::ReturnFlags::empty(), &exit_status.to_le_bytes());
+	//api::return_value(uapi::ReturnFlags::empty(), &out.to_le_bytes());
+	api::return_value(uapi::ReturnFlags::empty(), &out);
 }

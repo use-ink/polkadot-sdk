@@ -57,7 +57,6 @@ sol! {
 		/// Most probably because of a wrong recovery id or signature.
 		function ecdsaToEthAddress(bytes memory pubkey)
 			external pure returns (address);
-		// fn sr25519_verify(signature: &[u8; 64], message: &[u8], pub_key: &[u8; 32]) -> Result {
 		/// Verify a sr25519 signature
 		///
 		/// # Parameters
@@ -65,10 +64,10 @@ sol! {
 		/// - `signature`: The signature bytes.
 		/// - `message`: The message bytes.
 		///
-		/// # Errors
+		/// # Returns
 		///
-		/// - [Sr25519VerifyFailed][`crate::ReturnErrorCode::Sr25519VerifyFailed
-		function sr25519Verify(bytes1[64] signature, bytes32 pubkey, bytes memory message)
+		/// `true` if verification successful, `false` otherwise.
+		function sr25519Verify(bytes32[2] signature, bytes32 pubkey, bytes memory message)
 			external pure returns (bool);
 	}
 }
@@ -85,6 +84,7 @@ impl<T: Config> BuiltinPrecompile for System<T> {
 		input: &Self::Interface,
 		env: &mut impl Ext<T = Self::T>,
 	) -> Result<Vec<u8>, Error> {
+		log::info!(target: crate::LOG_TARGET, "-------------------0");
 		use ISystem::ISystemCalls;
 		match input {
 			ISystemCalls::hashBlake256(ISystem::hashBlake256Call { input }) => {
@@ -115,17 +115,25 @@ impl<T: Config> BuiltinPrecompile for System<T> {
 				Ok(ret.abi_encode())
 			},
 			ISystemCalls::sr25519Verify(ISystem::sr25519VerifyCall { signature, pubkey, message }) => {
+				log::info!(target: crate::LOG_TARGET, "-------------------1");
 				env.gas_meter_mut().charge(RuntimeCosts::Sr25519Verify(message.len() as u32))?;
 				//let sig = <&[alloy_core::primitives::FixedBytes<1>; 64] as Into<T>>::into(signature);
 				//let mut sig = [0u8; 64];
 				//signature.
 				//let signature = signature.0;
 
+				log::info!(target: crate::LOG_TARGET, "-------------------2");
 				let mut sig = [0u8; 64];
+				sig[..32].copy_from_slice(&signature[0][..32]);
+				sig[32..].copy_from_slice(&signature[1][..32]);
+				/*
 				for (i, b) in signature.iter().enumerate() {
 					sig[i] = b[0];
 				}
+				 */
+				log::info!(target: crate::LOG_TARGET, "-------------------3");
 				let ret = env.sr25519_verify(&sig, &message, &pubkey);
+				log::info!(target: crate::LOG_TARGET, "-------------------4");
 				Ok(ret.abi_encode())
 			}
 		}
