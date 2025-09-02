@@ -1672,8 +1672,6 @@ where
 	}
 
 	fn terminate(&mut self, beneficiary: &H160) -> Result<CodeRemoved, DispatchError> {
-		log::info!(target: crate::LOG_TARGET, "----------------terminate 1");
-		panic!("ahh");
 		if self.is_recursive() {
 			return Err(Error::<T>::TerminatedWhileReentrant.into());
 		}

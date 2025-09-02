@@ -17,13 +17,7 @@
 
 #![no_std]
 #![no_main]
-
-#![allow(dead_code)]
-#![allow(unused_variables)]
-#![allow(unused)]
-
 include!("../panic_handler.rs");
-include!("../sol_utils.rs");
 
 use uapi::{input, HostFn, HostFnImpl as api};
 
@@ -35,6 +29,5 @@ pub extern "C" fn deploy() {}
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
 	input!(beneficiary: &[u8; 20],);
-	//api::terminate(&beneficiary);
-	self_destruct::<api>(&[0u8; 20]);
+	api::terminate(&beneficiary);
 }

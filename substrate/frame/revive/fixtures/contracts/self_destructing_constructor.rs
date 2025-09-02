@@ -17,21 +17,14 @@
 
 #![no_std]
 #![no_main]
-
-#![allow(dead_code)]
-#![allow(unused_variables)]
-#![allow(unused)]
-
 include!("../panic_handler.rs");
-include!("../sol_utils.rs");
 
 use uapi::{HostFn, HostFnImpl as api};
 
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn deploy() {
-	//api::terminate(&[0u8; 20]);
-	self_destruct::<api>(&[0u8; 20]);
+	api::terminate(&[0u8; 20]);
 }
 
 #[no_mangle]

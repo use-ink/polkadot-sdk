@@ -598,6 +598,24 @@ pub trait HostFn: private::Sealed {
 	#[unstable_hostfn]
 	fn take_storage(flags: StorageFlags, key: &[u8], output: &mut &mut [u8]) -> Result;
 
+	/// Remove the calling account and transfer remaining **free** balance.
+	///
+	/// This function never returns. Either the termination was successful and the
+	/// execution of the destroyed contract is halted. Or it failed during the termination
+	/// which is considered fatal and results in a trap + rollback.
+	///
+	/// # Parameters
+	///
+	/// - `beneficiary`: The address of the beneficiary account
+	///
+	/// # Traps
+	///
+	/// - The contract is live i.e is already on the call stack.
+	/// - Failed to send the balance to the beneficiary.
+	/// - The deletion queue is full.
+	#[unstable_hostfn]
+	fn terminate(beneficiary: &[u8; 20]) -> !;
+
 	/// Stores the amount of weight left into the supplied buffer.
 	/// The data is encoded as Weight.
 	///
