@@ -88,6 +88,29 @@ impl<T: Config> BuiltinPrecompile for System<T> {
 				let res = (ref_time, proof_size);
 				Ok(res.abi_encode())
 			},
+			ISystemCalls::ecdsaToEthAddress(ISystem::ecdsaToEthAddressCall { pubkey }) => {
+				env.gas_meter_mut().charge(RuntimeCosts::EcdsaToEthAddress)?;
+				let foo: &[u8] = pubkey.as_ref();
+				let ret = match env.ecdsa_to_eth_address(foo.try_into().unwrap()) {
+					Ok(ret) => ret,
+					Err(_) => [0u8; 20],
+				};
+				Ok(ret.abi_encode())
+			},
+			ISystemCalls::sr25519Verify(ISystem::sr25519VerifyCall {
+				signature,
+				pubkey,
+				message,
+			}) => {
+				env.gas_meter_mut().charge(RuntimeCosts::Sr25519Verify(message.len() as u32))?;
+
+				let mut sig = [0u8; 64];
+				sig[..32].copy_from_slice(&signature[0][..32]);
+				sig[32..].copy_from_slice(&signature[1][..32]);
+
+				let ret = env.sr25519_verify(&sig, &message, &pubkey);
+				Ok(ret.abi_encode())
+			},
 		}
 	}
 }

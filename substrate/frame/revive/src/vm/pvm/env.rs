@@ -840,27 +840,6 @@ pub mod env {
 		Ok(self.ext.gas_left())
 	}
 
-	/// Calculates Ethereum address from the ECDSA compressed public key and stores
-	/// See [`pallet_revive_uapi::HostFn::ecdsa_to_eth_address`].
-	fn ecdsa_to_eth_address(
-		&mut self,
-		memory: &mut M,
-		key_ptr: u32,
-		out_ptr: u32,
-	) -> Result<ReturnErrorCode, TrapReason> {
-		self.charge_gas(RuntimeCosts::EcdsaToEthAddress)?;
-		let mut compressed_key: [u8; 33] = [0; 33];
-		memory.read_into_buf(key_ptr, &mut compressed_key)?;
-		let result = self.ext.ecdsa_to_eth_address(&compressed_key);
-		match result {
-			Ok(eth_address) => {
-				memory.write(out_ptr, eth_address.as_ref())?;
-				Ok(ReturnErrorCode::Success)
-			},
-			Err(_) => Ok(ReturnErrorCode::EcdsaRecoveryFailed),
-		}
-	}
-
 	/// Replace the contract code at the specified address with new code.
 	/// See [`pallet_revive_uapi::HostFn::set_code_hash`].
 	///
@@ -876,6 +855,7 @@ pub mod env {
 		Ok(())
 	}
 
+	/*
 	/// Verify a sr25519 signature
 	/// See [`pallet_revive_uapi::HostFn::sr25519_verify`].
 	fn sr25519_verify(
@@ -902,6 +882,7 @@ pub mod env {
 			Ok(ReturnErrorCode::Sr25519VerifyFailed)
 		}
 	}
+	*/
 
 	/// Remove the calling account and transfer remaining **free** balance.
 	/// See [`pallet_revive_uapi::HostFn::terminate`].

@@ -66,5 +66,32 @@ sol! {
 
 		/// Returns the amount of `Weight` left.
 		function weightLeft() external view returns (uint64 refTime, uint64 proofSize);
+
+		/// Calculates the Ethereum address from the ECDSA compressed public key.
+		///
+		/// # Parameters
+		///
+		/// - `pubkey`: The public key bytes.
+		/// - `output`: A reference to the output data buffer to write the address.
+		///
+		/// # Returns
+		///
+		/// Returns an empty Vector if the ECDSA public key recovery failed.
+		/// Most probably because of a wrong recovery id or signature.
+		function ecdsaToEthAddress(bytes memory pubkey)
+			external pure returns (address);
+
+		/// Verify a sr25519 signature
+		///
+		/// # Parameters
+		///
+		/// - `signature`: The signature bytes.
+		/// - `message`: The message bytes.
+		///
+		/// # Returns
+		///
+		/// `true` if verification successful, `false` otherwise.
+		function sr25519Verify(bytes32[2] signature, bytes32 pubkey, bytes memory message)
+			external pure returns (bool);
 	}
 }

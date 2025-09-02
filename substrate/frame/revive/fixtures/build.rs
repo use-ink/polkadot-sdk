@@ -16,6 +16,7 @@
 // limitations under the License.
 
 //! Compile text fixtures to PolkaVM binaries.
+
 use anyhow::{bail, Context, Result};
 use cargo_metadata::MetadataCommand;
 use std::{

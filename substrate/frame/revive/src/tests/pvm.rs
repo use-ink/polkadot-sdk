@@ -1946,10 +1946,14 @@ fn sr25519_verify() {
 		};
 
 		// verification should succeed for "hello world"
-		assert_return_code!(call_with(&b"hello world"), RuntimeReturnCode::Success);
+		let ret = call_with(&b"hello world");
+		let mut expected = [0u8; 32];
+		expected[31] = 1;
+		assert_eq!(ret.data, expected);
 
 		// verification should fail for other messages
-		assert_return_code!(call_with(&b"hello worlD"), RuntimeReturnCode::Sr25519VerifyFailed);
+		let ret = call_with(&b"hello worlD");
+		assert!(ret.data == [0u8; 32]);
 	});
 }
 
