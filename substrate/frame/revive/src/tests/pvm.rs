@@ -1886,8 +1886,9 @@ fn sr25519_verify() {
 
 		// verification should succeed for "hello world"
 		let ret = call_with(&b"hello world");
-		let verified_successly = ret.data[31] == 1;
-		assert!(verified_successly);
+		let mut expected = [0u8; 32];
+		expected[31] = 1;
+		assert_eq!(ret.data, expected);
 
 		// verification should fail for other messages
 		let ret = call_with(&b"hello worlD");

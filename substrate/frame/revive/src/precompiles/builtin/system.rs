@@ -21,8 +21,7 @@ use crate::{
 	Config,
 };
 use alloc::vec::Vec;
-use alloy_core::sol;
-use alloy_core::sol_types::SolValue;
+use alloy_core::{sol, sol_types::SolValue};
 use core::{marker::PhantomData, num::NonZero};
 use sp_core::hexdisplay::AsBytesRef;
 
@@ -84,7 +83,6 @@ impl<T: Config> BuiltinPrecompile for System<T> {
 		input: &Self::Interface,
 		env: &mut impl Ext<T = Self::T>,
 	) -> Result<Vec<u8>, Error> {
-		log::info!(target: crate::LOG_TARGET, "-------------------0");
 		use ISystem::ISystemCalls;
 		match input {
 			ISystemCalls::hashBlake256(ISystem::hashBlake256Call { input }) => {
@@ -110,32 +108,24 @@ impl<T: Config> BuiltinPrecompile for System<T> {
 				let foo: &[u8] = pubkey.as_ref();
 				let ret = match env.ecdsa_to_eth_address(foo.try_into().unwrap()) {
 					Ok(ret) => ret,
-					Err(_) => [0u8; 20]
+					Err(_) => [0u8; 20],
 				};
 				Ok(ret.abi_encode())
 			},
-			ISystemCalls::sr25519Verify(ISystem::sr25519VerifyCall { signature, pubkey, message }) => {
-				log::info!(target: crate::LOG_TARGET, "-------------------1");
+			ISystemCalls::sr25519Verify(ISystem::sr25519VerifyCall {
+				signature,
+				pubkey,
+				message,
+			}) => {
 				env.gas_meter_mut().charge(RuntimeCosts::Sr25519Verify(message.len() as u32))?;
-				//let sig = <&[alloy_core::primitives::FixedBytes<1>; 64] as Into<T>>::into(signature);
-				//let mut sig = [0u8; 64];
-				//signature.
-				//let signature = signature.0;
 
-				log::info!(target: crate::LOG_TARGET, "-------------------2");
 				let mut sig = [0u8; 64];
 				sig[..32].copy_from_slice(&signature[0][..32]);
 				sig[32..].copy_from_slice(&signature[1][..32]);
-				/*
-				for (i, b) in signature.iter().enumerate() {
-					sig[i] = b[0];
-				}
-				 */
-				log::info!(target: crate::LOG_TARGET, "-------------------3");
+
 				let ret = env.sr25519_verify(&sig, &message, &pubkey);
-				log::info!(target: crate::LOG_TARGET, "-------------------4");
 				Ok(ret.abi_encode())
-			}
+			},
 		}
 	}
 }

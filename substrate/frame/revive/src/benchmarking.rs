@@ -2095,60 +2095,34 @@ mod benchmarks {
 		let sig = AsRef::<[u8; 64]>::as_ref(&sig).to_vec();
 		let sig_len = sig.len() as u32;
 
-		//build_runtime!(runtime, memory: [sig, pub_key.to_vec(), message, ]);
-		//function sr25519Verify(bytes1[64] signature, bytes32 pubkey, bytes memory message)
-		//let sig: sig.into_iter().collect::<Vec<_>>().into(),
-		// Map each byte into a FixedBytes<1>
 		use alloy_core::primitives::FixedBytes;
 		let half1 = FixedBytes::<32>::from_slice(&sig[..32]);
 		let half2 = FixedBytes::<32>::from_slice(&sig[32..]);
 		let sigt: [FixedBytes<32>; 2] = [half1, half2];
-		/*
-		let sigt: [FixedBytes<32>; 2] = sig
-			.into_iter()
-			.map(|b| FixedBytes::<32>::from([b]))
-			//.map(|b| b.0)
-			.collect::<Vec<_>>()
-			.try_into()
-			.unwrap();
-			//.map_err(|_| "conversion to array failed")?;
-		 */
 
-		let input_bytes =
-			ISystem::ISystemCalls::sr25519Verify(ISystem::sr25519VerifyCall {
-				signature: sigt,
-				pubkey: pub_key.0.into(), //as_bytes(), //_bytes.into(),
-				message: message.into()
-			})
-				.abi_encode();
+		let input_bytes = ISystem::ISystemCalls::sr25519Verify(ISystem::sr25519VerifyCall {
+			signature: sigt,
+			pubkey: pub_key.0.into(),
+			message: message.into(),
+		})
+		.abi_encode();
 
 		let mut call_setup = CallSetup::<T>::default();
 		let (mut ext, _) = call_setup.ext();
 
-
 		let result;
 		#[block]
 		{
-			//result =
-				//run_builtin_precompile(&mut ext, H160::from_low_u64_be(1).as_fixed_bytes(), input);
 			result = run_builtin_precompile(
 				&mut ext,
 				H160(BenchmarkSystem::<T>::MATCHER.base_address()).as_fixed_bytes(),
 				input_bytes,
 			);
-
-			/*
-			result = runtime.bench_sr25519_verify(
-				memory.as_mut_slice(),
-				0,                              // signature_ptr
-				sig_len,                        // pub_key_ptr
-				message_len,                    // message_len
-				sig_len + pub_key.len() as u32, // message_ptr
-			);
-			 */
 		}
 
-		//assert_eq!(result.unwrap(), ReturnErrorCode::Success);
+		let mut expected = [0u8; 32];
+		expected[31] = 1;
+		assert_eq!(result.unwrap().data, expected);
 	}
 
 	#[benchmark(pov_mode = Measured)]

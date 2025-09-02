@@ -370,13 +370,10 @@ impl<P: BuiltinPrecompile> PrimitivePrecompile for P {
 		input: Vec<u8>,
 		env: &mut impl Ext<T = Self::T>,
 	) -> Result<Vec<u8>, Error> {
-		log::info!(target: crate::LOG_TARGET, "-------------------calling with input {:?}", input);
-		let call = <Self as BuiltinPrecompile>::Interface::abi_decode_validate(&input)
-			.map_err(|err| {
-				log::info!(target: crate::LOG_TARGET, "-------------------calling 1 {:?}", err);
+		let call =
+			<Self as BuiltinPrecompile>::Interface::abi_decode_validate(&input).map_err(|err| {
 				Error::Panic(PanicKind::ResourceError)
 			})?;
-		log::info!(target: crate::LOG_TARGET, "-------------------calling 1");
 		<Self as BuiltinPrecompile>::call(address, &call, env)
 	}
 
