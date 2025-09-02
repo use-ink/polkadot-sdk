@@ -146,7 +146,7 @@ pub enum RuntimeCosts {
 	HashBlake128(u32),
 	/// Weight of calling `ECERecover` precompile.
 	EcdsaRecovery,
-	/// Weight of calling `seal_sr25519_verify` for the given input size.
+	/// Weight of calling the `System::sr25519Verify` precompile function for the given input size.
 	Sr25519Verify(u32),
 	/// Weight charged by a precompile.
 	Precompile(Weight),
@@ -298,7 +298,7 @@ impl<T: Config> Token<T> for RuntimeCosts {
 			HashBlake256(len) => T::WeightInfo::hash_blake2_256(len),
 			HashBlake128(len) => T::WeightInfo::hash_blake2_128(len),
 			EcdsaRecovery => T::WeightInfo::ecdsa_recover(),
-			Sr25519Verify(len) => T::WeightInfo::seal_sr25519_verify(len),
+			Sr25519Verify(len) => T::WeightInfo::sr25519_verify(len),
 			Precompile(weight) => weight,
 			SetCodeHash { old_code_removed } =>
 				T::WeightInfo::seal_set_code_hash(old_code_removed.into()),

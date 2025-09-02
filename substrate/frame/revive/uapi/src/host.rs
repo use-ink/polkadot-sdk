@@ -512,20 +512,6 @@ pub trait HostFn: private::Sealed {
 	#[unstable_hostfn]
 	fn contains_storage(flags: StorageFlags, key: &[u8]) -> Option<u32>;
 
-	/// Calculates Ethereum address from the ECDSA compressed public key and stores
-	/// it into the supplied buffer.
-	///
-	/// # Parameters
-	///
-	/// - `pubkey`: The public key bytes.
-	/// - `output`: A reference to the output data buffer to write the address.
-	///
-	/// # Errors
-	///
-	/// - [EcdsaRecoveryFailed][`crate::ReturnErrorCode::EcdsaRecoveryFailed]
-	#[unstable_hostfn]
-	fn ecdsa_to_eth_address(pubkey: &[u8; 33], output: &mut [u8; 20]) -> Result;
-
 	/// Stores the minimum balance (a.k.a. existential deposit) into the supplied buffer.
 	///
 	/// # Parameters
@@ -572,19 +558,6 @@ pub trait HostFn: private::Sealed {
 	/// Panics if there is no code on-chain with the specified hash.
 	#[unstable_hostfn]
 	fn set_code_hash(code_hash: &[u8; 32]);
-
-	/// Verify a sr25519 signature
-	///
-	/// # Parameters
-	///
-	/// - `signature`: The signature bytes.
-	/// - `message`: The message bytes.
-	///
-	/// # Errors
-	///
-	/// - [Sr25519VerifyFailed][`crate::ReturnErrorCode::Sr25519VerifyFailed]
-	#[unstable_hostfn]
-	fn sr25519_verify(signature: &[u8; 64], message: &[u8], pub_key: &[u8; 32]) -> Result;
 
 	/// Retrieve and remove the value under the given key from storage.
 	///

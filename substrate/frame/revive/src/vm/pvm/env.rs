@@ -900,27 +900,6 @@ pub mod env {
 		self.contains_storage(memory, flags, key_ptr, key_len)
 	}
 
-	/// Calculates Ethereum address from the ECDSA compressed public key and stores
-	/// See [`pallet_revive_uapi::HostFn::ecdsa_to_eth_address`].
-	fn ecdsa_to_eth_address(
-		&mut self,
-		memory: &mut M,
-		key_ptr: u32,
-		out_ptr: u32,
-	) -> Result<ReturnErrorCode, TrapReason> {
-		self.charge_gas(RuntimeCosts::EcdsaToEthAddress)?;
-		let mut compressed_key: [u8; 33] = [0; 33];
-		memory.read_into_buf(key_ptr, &mut compressed_key)?;
-		let result = self.ext.ecdsa_to_eth_address(&compressed_key);
-		match result {
-			Ok(eth_address) => {
-				memory.write(out_ptr, eth_address.as_ref())?;
-				Ok(ReturnErrorCode::Success)
-			},
-			Err(_) => Ok(ReturnErrorCode::EcdsaRecoveryFailed),
-		}
-	}
-
 	/// Stores the minimum balance (a.k.a. existential deposit) into the supplied buffer.
 	/// See [`pallet_revive_uapi::HostFn::minimum_balance`].
 	fn minimum_balance(&mut self, memory: &mut M, out_ptr: u32) -> Result<(), TrapReason> {
@@ -963,6 +942,7 @@ pub mod env {
 		Ok(())
 	}
 
+	/*
 	/// Verify a sr25519 signature
 	/// See [`pallet_revive_uapi::HostFn::sr25519_verify`].
 	fn sr25519_verify(
@@ -989,6 +969,7 @@ pub mod env {
 			Ok(ReturnErrorCode::Sr25519VerifyFailed)
 		}
 	}
+	*/
 
 	/// Retrieve and remove the value under the given key from storage.
 	/// See [`pallet_revive_uapi::HostFn::take_storage`]

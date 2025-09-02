@@ -17,7 +17,13 @@
 
 #![no_std]
 #![no_main]
+
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(unused)]
+
 include!("../panic_handler.rs");
+include!("../sol_utils.rs");
 
 use uapi::{input, HostFn, HostFnImpl as api};
 
@@ -34,6 +40,7 @@ pub extern "C" fn call() {
 		msg: [u8; 11],
 	);
 
+	/*
 	let exit_status = match api::sr25519_verify(
 		&signature.try_into().unwrap(),
 		msg,
@@ -42,7 +49,29 @@ pub extern "C" fn call() {
 		Ok(_) => 0u32,
 		Err(code) => code as u32,
 	};
+	*/
+
+
+	//function sr25519Verify(bytes1[64] signature, bytes32 pubkey, bytes memory message)
+	let mut input = [0u8; 512];
+	let selector = solidity_selector("sr25519Recover(bytes1[64],bytes32,bytes)");
+	input[..4].copy_from_slice(&selector[..4]);
+	input[4..68].copy_from_slice(&signature[..64]);
+	input[68..68+32].copy_from_slice(&pub_key[..32]);
+
+	let n = encode_bytes(&msg, &mut input[68+32..]);
+	//input[68+32..68+32+64].copy_from_slice(&pubkey[..32]);
+
+	let _ = api::delegate_call(
+		uapi::CallFlags::empty(),
+		&SYSTEM_PRECOMPILE_ADDR,
+		u64::MAX,       // How much ref_time to devote for the execution. u64::MAX = use all.
+		u64::MAX,       // How much proof_size to devote for the execution. u64::MAX = use all.
+		&[u8::MAX; 32], // No deposit limit.
+		&input[..68+32+n],
+		None,
+	).unwrap();
 
 	// Exit with success and take transfer return code to the output buffer.
-	api::return_value(uapi::ReturnFlags::empty(), &exit_status.to_le_bytes());
+	//api::return_value(uapi::ReturnFlags::empty(), &exit_status.to_le_bytes());
 }

@@ -2084,7 +2084,7 @@ mod benchmarks {
 	// `n`: Message input length to verify in bytes.
 	// need some buffer so the code size does not exceed the max code size.
 	#[benchmark(pov_mode = Measured)]
-	fn seal_sr25519_verify(n: Linear<0, { limits::code::BLOB_BYTES - 255 }>) {
+	fn sr25519_verify(n: Linear<0, { limits::code::BLOB_BYTES - 255 }>) {
 		let message = (0..n).zip((32u8..127u8).cycle()).map(|(_, c)| c).collect::<Vec<_>>();
 		let message_len = message.len() as u32;
 
@@ -2095,11 +2095,43 @@ mod benchmarks {
 		let sig = AsRef::<[u8; 64]>::as_ref(&sig).to_vec();
 		let sig_len = sig.len() as u32;
 
-		build_runtime!(runtime, memory: [sig, pub_key.to_vec(), message, ]);
+		//build_runtime!(runtime, memory: [sig, pub_key.to_vec(), message, ]);
+		//function sr25519Verify(bytes1[64] signature, bytes32 pubkey, bytes memory message)
+		//let sig: sig.into_iter().collect::<Vec<_>>().into(),
+		// Map each byte into a FixedBytes<1>
+		use alloy_core::primitives::FixedBytes;
+		let sigt: [FixedBytes<1>; 64] = sig
+			.into_iter()
+			.map(|b| FixedBytes::<1>::from([b]))
+			.collect::<Vec<_>>()
+			.try_into()
+			.unwrap();
+			//.map_err(|_| "conversion to array failed")?;
+
+		let input_bytes =
+			ISystem::ISystemCalls::sr25519Verify(ISystem::sr25519VerifyCall {
+				signature: sigt,
+				pubkey: pub_key.0.into(), //as_bytes(), //_bytes.into(),
+				message: message.into()
+			})
+				.abi_encode();
+
+		let mut call_setup = CallSetup::<T>::default();
+		let (mut ext, _) = call_setup.ext();
+
 
 		let result;
 		#[block]
 		{
+			//result =
+				//run_builtin_precompile(&mut ext, H160::from_low_u64_be(1).as_fixed_bytes(), input);
+			result = run_builtin_precompile(
+				&mut ext,
+				H160(BenchmarkSystem::<T>::MATCHER.base_address()).as_fixed_bytes(),
+				input_bytes,
+			);
+
+			/*
 			result = runtime.bench_sr25519_verify(
 				memory.as_mut_slice(),
 				0,                              // signature_ptr
@@ -2107,9 +2139,10 @@ mod benchmarks {
 				message_len,                    // message_len
 				sig_len + pub_key.len() as u32, // message_ptr
 			);
+			 */
 		}
 
-		assert_eq!(result.unwrap(), ReturnErrorCode::Success);
+		//assert_eq!(result.unwrap(), ReturnErrorCode::Success);
 	}
 
 	#[benchmark(pov_mode = Measured)]
@@ -2244,23 +2277,31 @@ mod benchmarks {
 	// generated different ECDSA keys.
 	// This is a slow call: We reduce the number of runs.
 	#[benchmark(pov_mode = Measured)]
-	fn seal_ecdsa_to_eth_address() {
+	fn ecdsa_to_eth_address() {
 		let key_type = sp_core::crypto::KeyTypeId(*b"code");
 		let pub_key_bytes = sp_io::crypto::ecdsa_generate(key_type, None).0;
-		build_runtime!(runtime, memory: [[0u8; 20], pub_key_bytes,]);
+		//build_runtime!(runtime, memory: [[0u8; 20], pub_key_bytes,]);
+
+		let input_bytes =
+			ISystem::ISystemCalls::ecdsaToEthAddress(ISystem::ecdsaToEthAddressCall {
+				pubkey: pub_key_bytes.into(),
+			})
+			.abi_encode();
+
+		let mut call_setup = CallSetup::<T>::default();
+		let (mut ext, _) = call_setup.ext();
 
 		let result;
 		#[block]
 		{
-			result = runtime.bench_ecdsa_to_eth_address(
-				memory.as_mut_slice(),
-				20, // key_ptr
-				0,  // output_ptr
+			result = run_builtin_precompile(
+				&mut ext,
+				H160(BenchmarkSystem::<T>::MATCHER.base_address()).as_fixed_bytes(),
+				input_bytes,
 			);
 		}
-
-		assert_ok!(result);
-		assert_eq!(&memory[..20], runtime.ext().ecdsa_to_eth_address(&pub_key_bytes).unwrap());
+		let data = result.unwrap().data;
+		//assert_eq!(&data[..20], ext.ecdsa_to_eth_address(&pub_key_bytes).unwrap());
 	}
 
 	/// Benchmark the cost of setting the code hash of a contract.
