@@ -1360,8 +1360,8 @@ dependencies = [
  "pallet-preimage",
  "pallet-proxy",
  "pallet-referenda",
- "pallet-revive",
  "pallet-revive-fixtures",
+ "pallet-revive-ink-next",
  "pallet-scheduler",
  "pallet-session",
  "pallet-staking",
@@ -1461,7 +1461,7 @@ dependencies = [
  "impl-trait-for-tuples",
  "pallet-asset-conversion",
  "pallet-assets",
- "pallet-revive",
+ "pallet-revive-ink-next",
  "pallet-revive-uapi",
  "pallet-xcm",
  "parachains-common",
@@ -11418,7 +11418,7 @@ dependencies = [
  "impl-trait-for-tuples",
  "log",
  "pallet-balances",
- "pallet-revive",
+ "pallet-revive-ink-next",
  "parity-scale-codec",
  "scale-info",
  "sp-core 28.0.0",
@@ -13049,8 +13049,62 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-revive"
+name = "pallet-revive-eth-rpc"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "env_logger 0.11.3",
+ "futures",
+ "git2",
+ "hex",
+ "jsonrpsee",
+ "log",
+ "pallet-revive-fixtures",
+ "pallet-revive-ink-next",
+ "parity-scale-codec",
+ "pretty_assertions",
+ "rlp 0.6.1",
+ "sc-cli",
+ "sc-rpc",
+ "sc-rpc-api",
+ "sc-service",
+ "serde_json",
+ "sp-arithmetic",
+ "sp-core 28.0.0",
+ "sp-crypto-hashing 0.1.0",
+ "sp-rpc",
+ "sp-runtime",
+ "sp-weights",
+ "sqlx",
+ "static_init",
+ "substrate-cli-test-utils",
+ "substrate-prometheus-endpoint",
+ "subxt 0.43.0",
+ "subxt-signer 0.43.0",
+ "thiserror 1.0.65",
+ "tokio",
+]
+
+[[package]]
+name = "pallet-revive-fixtures"
+version = "0.1.0"
+dependencies = [
+ "alloy-core",
+ "anyhow",
+ "cargo_metadata",
+ "hex",
+ "pallet-revive-uapi",
+ "polkavm-linker 0.27.0",
+ "serde_json",
+ "sp-core 28.0.0",
+ "sp-io",
+ "toml",
+]
+
+[[package]]
+name = "pallet-revive-ink-next"
+version = "6.0.0-alpha.4"
 dependencies = [
  "alloy-core",
  "array-bytes 6.2.2",
@@ -13103,60 +13157,6 @@ dependencies = [
  "sp-tracing 16.0.0",
  "substrate-bn",
  "subxt-signer 0.43.0",
-]
-
-[[package]]
-name = "pallet-revive-eth-rpc"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "env_logger 0.11.3",
- "futures",
- "git2",
- "hex",
- "jsonrpsee",
- "log",
- "pallet-revive",
- "pallet-revive-fixtures",
- "parity-scale-codec",
- "pretty_assertions",
- "rlp 0.6.1",
- "sc-cli",
- "sc-rpc",
- "sc-rpc-api",
- "sc-service",
- "serde_json",
- "sp-arithmetic",
- "sp-core 28.0.0",
- "sp-crypto-hashing 0.1.0",
- "sp-rpc",
- "sp-runtime",
- "sp-weights",
- "sqlx",
- "static_init",
- "substrate-cli-test-utils",
- "substrate-prometheus-endpoint",
- "subxt 0.43.0",
- "subxt-signer 0.43.0",
- "thiserror 1.0.65",
- "tokio",
-]
-
-[[package]]
-name = "pallet-revive-fixtures"
-version = "0.1.0"
-dependencies = [
- "alloy-core",
- "anyhow",
- "cargo_metadata",
- "hex",
- "pallet-revive-uapi",
- "polkavm-linker 0.27.0",
- "serde_json",
- "sp-core 28.0.0",
- "sp-io",
- "toml",
 ]
 
 [[package]]
@@ -14028,7 +14028,7 @@ dependencies = [
  "hex-literal",
  "pallet-assets",
  "pallet-balances",
- "pallet-revive",
+ "pallet-revive-ink-next",
  "pallet-timestamp",
  "parity-scale-codec",
  "polkadot-parachain-primitives",
@@ -14456,7 +14456,7 @@ dependencies = [
  "pallet-balances",
  "pallet-collator-selection",
  "pallet-message-queue",
- "pallet-revive",
+ "pallet-revive-ink-next",
  "pallet-session",
  "pallet-sudo",
  "pallet-timestamp",
@@ -16349,8 +16349,8 @@ dependencies = [
  "pallet-recovery",
  "pallet-referenda",
  "pallet-remark",
- "pallet-revive",
  "pallet-revive-eth-rpc",
+ "pallet-revive-ink-next",
  "pallet-revive-proc-macro",
  "pallet-revive-uapi",
  "pallet-root-offences",
