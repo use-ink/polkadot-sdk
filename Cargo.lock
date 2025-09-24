@@ -1462,7 +1462,7 @@ dependencies = [
  "pallet-asset-conversion",
  "pallet-assets",
  "pallet-revive-ink-next",
- "pallet-revive-uapi",
+ "pallet-revive-uapi-ink-next",
  "pallet-xcm",
  "parachains-common",
  "parity-scale-codec",
@@ -13094,7 +13094,7 @@ dependencies = [
  "anyhow",
  "cargo_metadata",
  "hex",
- "pallet-revive-uapi",
+ "pallet-revive-uapi-ink-next",
  "polkavm-linker 0.27.0",
  "serde_json",
  "sp-core 28.0.0",
@@ -13127,7 +13127,7 @@ dependencies = [
  "pallet-proxy",
  "pallet-revive-fixtures",
  "pallet-revive-proc-macro",
- "pallet-revive-uapi",
+ "pallet-revive-uapi-ink-next",
  "pallet-timestamp",
  "pallet-transaction-payment",
  "pallet-utility",
@@ -13169,8 +13169,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-revive-uapi"
-version = "0.1.0"
+name = "pallet-revive-uapi-ink-next"
+version = "6.0.0-alpha.4"
 dependencies = [
  "bitflags 1.3.2",
  "const-crypto",
@@ -16352,7 +16352,7 @@ dependencies = [
  "pallet-revive-eth-rpc",
  "pallet-revive-ink-next",
  "pallet-revive-proc-macro",
- "pallet-revive-uapi",
+ "pallet-revive-uapi-ink-next",
  "pallet-root-offences",
  "pallet-root-testing",
  "pallet-safe-mode",
