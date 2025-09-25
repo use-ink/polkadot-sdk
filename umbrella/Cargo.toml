@@ -1615,6 +1615,7 @@ path = "../substrate/frame/remark"
 [dependencies.pallet-revive]
 default-features = false
 optional = true
+package = "pallet-revive-ink-next"
 path = "../substrate/frame/revive"
 
 [dependencies.pallet-revive-proc-macro]
@@ -1625,6 +1626,7 @@ path = "../substrate/frame/revive/proc-macro"
 [dependencies.pallet-revive-uapi]
 default-features = false
 optional = true
+package = "pallet-revive-uapi-ink-next"
 path = "../substrate/frame/revive/uapi"
 
 [dependencies.pallet-root-offences]

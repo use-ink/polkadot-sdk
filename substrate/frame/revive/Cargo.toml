@@ -1,6 +1,6 @@
 [package]
-name = "pallet-revive"
-version = "0.1.0"
+name = "pallet-revive-ink-next"
+version = "6.0.0-alpha.4"
 authors.workspace = true
 edition.workspace = true
 license = "Apache-2.0"
